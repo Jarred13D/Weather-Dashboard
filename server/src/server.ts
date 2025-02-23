@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import express from 'express';
+import weatherRoutes from './routes/api/weatherRoutes.js';
 dotenv.config();
 
 // Import the routes
@@ -18,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Implement middleware to connect the routes
 app.use(routes);
+app.use('/api/weather', weatherRoutes);
 
 // Start the server on the port
 app.listen(PORT, () => console.log(`Listening on PORT: ${PORT}`));
