@@ -6,5 +6,21 @@
 	{
 		"name": "St. Petersburg",
 		"id": "cdde5456-7119-4298-bc8d-cc9a752a726e"
+	},
+	{
+		"name": "Tampa",
+		"id": "3b7e04e8-fb54-425b-9393-67e0e8efe330"
+	},
+	{
+		"name": "tampa",
+		"id": "f7514d94-7408-428f-a7a1-5869b50f697d"
+	},
+	{
+		"name": "Orlando",
+		"id": "85932d3c-abc6-42d2-8f95-7ed3f4b31130"
+	},
+	{
+		"name": "Vegas",
+		"id": "344cdb46-b842-4f88-bb2e-3d73a982a2fa"
 	}
 ]

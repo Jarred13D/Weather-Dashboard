@@ -8,7 +8,7 @@ interface Coordinates {
 }
 //  Define a class for the Weather object
 class Weather {
-  tempF: number;
+  tempF: number | null;
   humidity: string;
   windSpeed: string;
   icon: string;
@@ -129,7 +129,7 @@ class WeatherService {
       throw new Error('Current weather data is undefined');
     }
   
-    const currentData = response.list[0]; // First data point
+    const currentData = response.list[0];
     const { temp: tempK } = currentData.main; // Temperature is in Kelvin
     const { description, icon } = currentData.weather[0];
   
@@ -137,13 +137,12 @@ class WeatherService {
     const tempF = ((tempK - 273.15) * 9/5 + 32).toFixed(2);
   
     // Ensure windSpeed and humidity have default values if missing
-    const windSpeed = currentData.wind?.speed !== undefined ? `${currentData.wind.speed} MPH` : "N/A";
-    const humidity = currentData.main?.humidity !== undefined ? `${currentData.main.humidity}%` : "N/A";
+    const windSpeed = currentData.wind?.speed !== undefined ? currentData.wind.speed.toString() : "N/A";
+    const humidity = currentData.main?.humidity !== undefined ? `${currentData.main.humidity}` : "N/A";
   
-    // Extract the forecast date from `dt_txt`
-    const forecastDate = new Date(currentData.dt * 1000).toLocaleDateString();
+    const forecastDate = new Date().toLocaleDateString();
   
-    return new Weather(`${response.city.name} (${forecastDate})`, parseFloat(tempF), description, icon, humidity, windSpeed, forecastDate);
+    return new Weather(response.city.name, parseFloat(tempF), description, icon, humidity, windSpeed, forecastDate);
   }
   
   // TODO: Complete buildForecastArray method
@@ -164,25 +163,46 @@ class WeatherService {
       }
     });
   
-    return Array.from(dailyForecastMap.values()).map((weather) => {
+    const forecastArray = Array.from(dailyForecastMap.values());
+
+    // Determine today's date string
+    const today = new Date().toLocaleDateString();
+
+    // Filter out the forecast item if it matches today's date
+    const filteredForecast = forecastArray.filter((weather) => {
+      const forecastDate = new Date(weather.dt * 1000).toLocaleDateString();
+      return forecastDate !== today; 
+    });
+
+    return filteredForecast.map((weather) => {
       console.log("Processing weather item:", weather);
-  
+
       const { dt, main, weather: conditions, wind } = weather;
-      
+
       // Convert Kelvin to Fahrenheit
-      const temperature = main?.temp !== undefined
-        ? `${((main.temp - 273.15) * 9/5 + 32).toFixed(2)} °F`
-        : "N/A";
-      
+      const tempF = main?.temp !== undefined
+        ? parseFloat(((main.temp - 273.15) * 9/5 + 32).toFixed(2))
+        : 0; // Default if missing
+
       const { description, icon } = conditions[0];
-  
+
+      // Convert wind speed to string but don't add "MPH" if the client does
+      const windSpeed = wind?.speed !== undefined
+        ? wind.speed.toString()
+        : "N/A";
+
+      // Remove extra '%' if the client also adds it
+      const humidity = main?.humidity !== undefined
+        ? main.humidity.toString() // e.g. "73"
+        : "N/A";
+
       return {
         date: new Date(dt * 1000).toLocaleDateString(),
-        temperature: temperature,
+        tempF: tempF,
         conditions: description,
         icon: icon,
-        windSpeed: wind?.speed ? `${wind.speed} MPH` : "N/A",
-        humidity: main?.humidity !== undefined ? `${main.humidity}%` : "N/A"
+        windSpeed: windSpeed,
+        humidity: humidity
       };
     });
   }
